@@ -11,21 +11,18 @@ const blogRoutes = require('./routes/blog')
 const { checkForAuthenticationCookie } = require("./middleware/authentication")
 
 const app = express()
-const PORT = 8001
+const PORT = 8000
 
 mongoose.connect(process.env.MONGODB_URL).then(e=>console.log("Mongodb connected..."))
 
-app.use(express.static(path.resolve("./public")))
 app.set("view engine",'ejs')
 app.set("views",path.resolve("./views"))
 
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 app.use(checkForAuthenticationCookie("token"))
-
-app.use("/user",userRoutes)
-app.use("/blog",blogRoutes)
-
+app.use(express.static(path.resolve("./public")))
+app.use('/blog', express.static('./public'))
 
 app.get("/",async (req,res)=>{
     const blog = await Blog.find({})
@@ -35,6 +32,9 @@ app.get("/",async (req,res)=>{
     })
 })
 
+
+app.use("/user",userRoutes)
+app.use("/blog",blogRoutes)
 
 app.listen(PORT,()=>{
     console.log(

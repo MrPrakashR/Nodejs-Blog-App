@@ -2,6 +2,7 @@ const { Router } = require("express")
 const path = require("path")
 const multer = require("multer")
 const Blog = require("../models/blog")
+const Comment = require("../models/comment")
 const router = Router()
 
 const storage = multer.diskStorage({
@@ -22,8 +23,6 @@ router.get("/add-new",(req,res)=>{
 })
 
 router.post("/", upload.single("CoverImage"),async (req,res)=>{
-    console.log(req.file)
-    console.log(req.body)
     const {title,body} = req.body
     const blog = await Blog.create(
         {
@@ -35,5 +34,26 @@ router.post("/", upload.single("CoverImage"),async (req,res)=>{
     res.redirect(`/blog/${blog._id}`)
 })
 
+router.get("/:id",async (req,res)=>{
+    const blog = await Blog.findById(req.params.id).populate("createdBy")
+    const comments = await Comment.find({blogId: req.params.id}).populate("createdBy")
+
+    res.render("blog",{
+        user:req.user,
+        blog:blog,
+        comments: comments
+    })
+})
+
+//Comments
+router.post("/comment/:blogId",async (req,res)=>{
+    const comment = await Comment.create({
+        content:req.body.content,
+        blogId:req.params.blogId,
+        createdBy: req.user._id
+    })
+
+    return res.redirect(`/blog/${req.params.blogId}`)
+})
 
 module.exports = router
