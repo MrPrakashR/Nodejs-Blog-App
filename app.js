@@ -11,7 +11,7 @@ const blogRoutes = require('./routes/blog')
 const { checkForAuthenticationCookie } = require("./middleware/authentication")
 
 const app = express()
-const PORT = 8000
+const PORT = process.env.PORT || 8000
 
 mongoose.connect(process.env.MONGODB_URL).then(e=>console.log("Mongodb connected..."))
 
